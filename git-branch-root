@@ -1,0 +1,2 @@
+#!/bin/sh
+git show -q $(git merge-base master $(git rev-parse --abbrev-ref HEAD))
