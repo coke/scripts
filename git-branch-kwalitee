@@ -1,0 +1,106 @@
+#!/bin/env perl6.bat
+
+use JSON::Fast;
+
+# For a particular branch in the current git repository, report on the kwalitee of the branch.
+# https://qa.perl.org/phalanx/kwalitee.html - Quality is hard to measure, so we pick things
+# that *are* measurable.
+
+# Read in configs
+my $config =  from-json((%*ENV<HOME> ~ "/.kwalitee.json").IO.slurp);
+# !! we are only using the email config right now. the date-based
+# parameters are still hardcoded below.
+
+sub get-prs {
+    my $projects = from-json run(<<curl -s -k -u $config<devops-access> https://dev.azure.com/deloittebsg/_apis/git/repositories/?api-version=5.1>>, :out).out.slurp(:close).chomp;
+    my $portal =  $projects<value>.grep({$_<name> eq "ETP-Portal"})[0];
+
+    my $prs = from-json run(<<curl -s -k -u $config<devops-access> "https://dev.azure.com/deloittebsg/_apis/git/repositories/$portal<id>/pullrequests?&api-version=5.1">>, :out).out.slurp(:close).chomp;
+    my %branches;
+    for $prs<value>[] -> $pr {
+        # Convert from refs to origin to match git branch names
+        %branches{$pr<sourceRefName>.subst(/^ 'refs/heads'/,"origin")} = $pr<title>;
+    }
+    return %branches;
+}
+
+class branch {
+    has $.name;
+    method get() {
+        run(<git branch -r>, :out).out.lines.grep({!$_.contains("origin/HEAD")}).map({.substr(2,*)});
+    }
+
+    method complain($string) {
+	    note "!$!name : $string";
+    }
+
+    method note($string) {
+	    note "#$!name : $string";
+    }
+
+    method kwalitee-age($rev, $limit, $message) {
+        my $days-since= Date.new(DateTime.now) - Date.new(
+            run(<<git show -q --format=%aI $rev>>, :out).out.slurp(:close).subst(/ 'T'.*/,''));
+
+        self.complain($message.sprintf($days-since)) if
+            $days-since > $limit;
+    }
+
+    method kwalitee-branch(:$all, :$prs?) {
+        # rev this branch has in common with master
+        my $merge-base-rev = git-short(run(<<git merge-base origin/master "{self.name}">>, :out).out.slurp(:close).chomp);
+
+        # Who has committed to this branch?
+        # Do any of the authors on this branch match our list of parties we care about?
+        unless $all {
+            my @authors = run(<<git log --format=%ae "$merge-base-rev...{self.name}">>, :out).out.slurp(:close).lines.sort.unique;
+            if ! @authors.first({my $i = $_; $config<email-rules>.first({$i.contains: $_})}) {
+                self.note("No commits from watched developers") if $*VERBOSE;
+                next;
+            } else {
+                self.note("Commit from watched developer") if $*VERBOSE;
+            }
+            self.note("Authors: " ~ @authors.join(" ")) if $*VERBOSE;
+        }
+        # Report out PR information
+        self.note("Active Pull Request: {$prs{self.name}}") if $prs{self.name};
+
+        # Should be user_work
+        #self.complain("Branch naming convention not followed")
+        #    unless self.name ~~ / \w+ <[_-]> \d+/;
+
+        self.kwalitee-age($merge-base-rev, $config<master-age>, "Rebased from a master commit ($merge-base-rev) that is %s days old");
+        self.kwalitee-age(self.name, $config<branch-age>, "Branch hasn't been committed to in %s days");
+
+    }
+}
+
+
+sub git-short($rev) {
+    run(<<git rev-parse --short "$rev">>, :out).out.slurp(:close).chomp;
+}
+
+sub MAIN(
+    Str $branch?,
+    Bool :v($verbose)=False,
+    Bool :h($help)=False,
+    Bool :a($all)=False
+    ) {
+    if $help {
+        note "# Be sure to run the following commands in this repository to ensure it's fresh.";
+        note "# git fetch";
+        note "# git remote prune origin";
+        exit;
+    }
+
+    note "# Showing all results" if $all;
+    my $*VERBOSE = $verbose;
+    my @branches = $branch ?? [$branch] !! branch.get;
+
+    my $every = $branch || $all;
+
+    my $prs = get-prs;
+    for @branches {
+        branch.new(:name($_)).kwalitee-branch(:all($every), :$prs);
+    }
+}
