@@ -1,0 +1,21 @@
+#! /bin/sh
+
+# show the various mac versions/names
+
+echo "10 β\tKodiak"
+echo "10.0\tCheetah"
+echo "10.1\tPuma"
+echo "10.2\tJaguar"
+echo "10.3\tPanther"
+echo "10.4\tTiger"
+echo "10.5\tLeopard"
+echo "10.6\tSnow Leopard"
+echo "10.7\tLion"
+echo "10.8\tMountain Lion"
+echo "10.9\tMavericks"
+echo "10.10\tYosemite"
+echo "10.11\tEl Capitan"
+echo "10.12\tSierra"
+echo "10.13\tHigh Sierra"
+echo "10.14\tMojave"
+echo "10.15\tCatalina"
