@@ -4,7 +4,7 @@
 ; today's date
 :://dd::
 FormatTime, CurrentDateTime,, MMM-dd
-SendInput [%CurrentDateTime%] - 
+SendInput [%CurrentDateTime%] -{Space}
 return
 
 :://d::
