@@ -1,6 +1,7 @@
 #! /bin/sh
 
 # show the various mac versions/names
+# https://en.wikipedia.org/wiki/List_of_Apple_operating_systems
 
 echo "10 β\tKodiak"
 echo "10.0\tCheetah"
@@ -20,3 +21,4 @@ echo "10.13\tHigh Sierra"
 echo "10.14\tMojave"
 echo "10.15\tCatalina"
 echo "11.0\tBig Sur"
+echo "12.0\tMonterey"
