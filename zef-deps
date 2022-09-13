@@ -51,6 +51,7 @@ sub MAIN(Str $module)  {
     while @queue {
         my $module = @queue.shift;
         next if %deps{$module}:exists;
+        say "# $module";
         %deps{$module} = get-info($module);
         @queue.append: |%deps{$module};
     }
