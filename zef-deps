@@ -64,9 +64,20 @@ sub MAIN(Str $module)  {
     }
 
     # Dump the dependencies
+    my %seen;
     sub show-deps($module, %deps, $depth=0) {
         print ' ' x $depth * $indent;
-        say $module;
+        print $module;
+        if %seen{$module} {
+            if %deps{$module}.elems {
+                 print ' ...';
+            }
+            say '';
+            return;
+        }
+        %seen{$module} = True;
+
+        say '';
         for @(%deps{$module}).sort.unique -> $dep {
             next unless $dep;
             show-deps($dep, %deps, $depth+1);
