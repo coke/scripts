@@ -10,8 +10,7 @@ This script is made available under the Artistic-2.0 license.
 
 
 our $lock = Lock.new;
-our $degree = 4;
-our $batch = 4;
+our $batch = 1;
 our $indent = 4;
 
 $*OUT.out-buffer = False;
@@ -28,7 +27,7 @@ sub MAIN(Str $module)  {
         my @copy = @queue.unique;
         @queue = Array.new;
         my %output;
-        @copy.race(:$degree, :$batch).map: -> $module {
+        @copy.race(:$batch).map: -> $module {
             next if %deps{$module}:exists;
 
             say "# $module";
