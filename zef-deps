@@ -8,6 +8,8 @@ This script is made available under the Artistic-2.0 license.
 
 =end comment
 
+# TODO, make this optionally instead of mandatory
+use Uxmal;
 
 our $lock = Lock.new;
 our $batch = 1;
@@ -15,7 +17,7 @@ our $indent = 4;
 
 $*OUT.out-buffer = False;
 
-sub MAIN(Str $module)  {
+sub MAIN(Str $module, Bool :$graph=False)  {
     run(<zef --help>, :out, :err) or die "Can't find zef; is your PATH correct?";
 
     my %deps;
@@ -89,6 +91,15 @@ sub MAIN(Str $module)  {
         }
     }
 
-    show-deps($module, %deps);
+    if $graph {
+        my @uxmal-deps;
+        for %deps.kv -> $k, $v {
+            @uxmal-deps.push: { :name($k), :depends($v) };
+        }
+
+        say attempt-full-dot-gen(depends-tree(@uxmal-deps));
+    } else {
+        show-deps($module, %deps);
+    }
 }
 
