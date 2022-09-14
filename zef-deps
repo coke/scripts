@@ -10,36 +10,10 @@ This script is made available under the Artistic-2.0 license.
 
 
 our $lock = Lock.new;
+our $degree = 6;
+our $indent = 4;
 
-sub get-info(Str $module) {
-    my $output;
-    react {
-        my $proc = Proc::Async.new: :w,
-            ['zef', 'info', '--verbose', $module];
-
-        whenever $proc.stdout.lines {
-            $lock.protect: {
-                $output ~= "$_\n";
-            }
-        }
-        whenever $proc.start {
-            done
-        }
-    }
-    my $depends = False;
-    my @deps;
-    for $output.lines -> $line {
-        $depends = True if $line.starts-with('Depends: ');
-        next unless $depends;
-
-        next unless $line ~~ /^ \d /;  
-
-        my @chunks = $line.split('|');
-        die "oops, I missed some zef format" unless @chunks.elems == 3;
-        @deps.push: @chunks[1].trim;
-    }
-    @deps;
-}
+$*OUT.out-buffer = False;
 
 sub MAIN(Str $module)  {
     run(<zef --help>, :out, :err) or die "Can't find zef; is your PATH correct?";
@@ -48,20 +22,53 @@ sub MAIN(Str $module)  {
 
     my @queue = $module;
 
-    while @queue {
-        my $module = @queue.shift;
-        next if %deps{$module}:exists;
-        say "# $module";
-        %deps{$module} = get-info($module);
-        @queue.append: |%deps{$module};
-    }
+    loop {
+        last unless @queue;
+        my @copy = @queue.unique;
+        @queue = Array.new;
+        my %output;
+        @copy.race(:$degree).map: -> $module {
+            next if %deps{$module}:exists;
 
+            say "# $module";
+            react {
+                my $proc = Proc::Async.new: ['zef', 'info', '--verbose', $module];
+
+                whenever $proc.stdout.lines {
+                    $lock.protect: {
+                        %output{$module} ~= "$_\n";
+                    }
+                }
+                whenever $proc.start {
+                    done
+                }
+            }
+        }
+
+        for %output.kv -> $module, $data {
+            my $depends = False;
+            %deps{$module} = Array.new;
+            for $data.lines -> $line {
+                $depends = True if $line.starts-with('Depends: ');
+                next unless $depends;
+                next unless $line ~~ /^ \d /;
+
+                my @chunks = $line.split('|');
+                die "oops, I missed some zef format" unless @chunks.elems == 3;
+
+                my $dep = @chunks[1].trim;
+                %deps{$module}.push: $dep;
+                @queue.push: $dep unless %deps{$dep}:exists;
+            }
+        }
+    }
 
     # Dump the dependencies
     sub show-deps($module, %deps, $depth=0) {
-        print ' ' x $depth * 4;
+        print ' ' x $depth * $indent;
         say $module;
-        for @(%deps{$module}).sort -> $dep {
+        for @(%deps{$module}).sort.unique -> $dep {
+            next unless $dep;
             show-deps($dep, %deps, $depth+1);
         }
     }
