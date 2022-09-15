@@ -17,7 +17,7 @@ our $indent = 4;
 
 $*OUT.out-buffer = False;
 
-sub MAIN(Str $module, Bool :$graph=False)  {
+sub MAIN(Str $module, Bool :$graph=False, Bool :$v=False)  {
     run(<zef --help>, :out, :err) or die "Can't find zef; is your PATH correct?";
 
     my %deps;
@@ -33,7 +33,7 @@ sub MAIN(Str $module, Bool :$graph=False)  {
         @copy.race(:$batch).map: -> $module {
             next if %deps{$module}:exists;
 
-            say "# $module";
+            say "# PACKAGE: $module";
             react {
                 my $proc = Proc::Async.new: ['zef', 'info', '--verbose', $module];
 
@@ -52,6 +52,7 @@ sub MAIN(Str $module, Bool :$graph=False)  {
             my $depends = False;
             %deps{$module} = Array.new;
             for $data.lines -> $line {
+                say "# $module|$line" if $v;
                 $depends = True if $line.starts-with('Depends: ');
                 next unless $depends;
                 next unless $line ~~ /^ \d /;
