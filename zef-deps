@@ -17,13 +17,13 @@ our $indent = 4;
 
 $*OUT.out-buffer = False;
 
-sub MAIN(Str $module, Bool :$graph=False, Bool :$v=False)  {
+sub MAIN(*@module, Bool :$graph=False, Bool :$v=False)  {
     run(<zef --help>, :out, :err) or die "Can't find zef; is your PATH correct?";
 
     my %deps;
     my %installed;
 
-    my @queue = $module;
+    my @queue = @module;
 
     loop {
         last unless @queue;
@@ -100,7 +100,9 @@ sub MAIN(Str $module, Bool :$graph=False, Bool :$v=False)  {
 
         say attempt-full-dot-gen(depends-tree(@uxmal-deps));
     } else {
-        show-deps($module, %deps);
+        for @module.sort -> $module {
+            show-deps($module, %deps);
+        }
     }
 }
 
