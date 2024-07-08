@@ -1,0 +1,4 @@
+#!/bin/zsh
+which zef >/dev/null || rakubrew build-zef
+which uni >/dev/null || zef install App::Uni
+uni $*
