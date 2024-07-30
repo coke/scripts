@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 which zef >/dev/null || rakubrew build-zef
 which sudoku >/dev/null || zef install App::SudokuHelper
 sudoku combo $*
