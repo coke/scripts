@@ -1,6 +1,5 @@
 #!/bin/zsh
 # Must be later in PATH than the zef install location
 which zef >/dev/null || rakubrew build-zef
-which uni >/dev/null || zef install App::Uni
-which uni
-uni $*
+[[ `which rak` = $0 ]] &&  zef install App::Rak
+rak $*
