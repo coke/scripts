@@ -10,5 +10,5 @@ do
        MERGED='(MERGED)' 
     fi
     echo -e `git show --format="%ci %cr %ce $MERGED" $branch | head -n 1` \\t$branch;
-done | sort -r
+done 
 
