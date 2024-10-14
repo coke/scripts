@@ -11,12 +11,19 @@ return
 SendInput * [ ]{Space}
 return
 
-; today's date
+; today's date for wiki inclusion
 :://dd::
 FormatTime, CurrentDateTime,, MMM-dd
 SendInput * :watch: [%CurrentDateTime%] -{Space}
 return
 
+; today's date (long but quiet)
+:://ddd::
+FormatTime, CurrentDateTime,, yyyy-MMM-dd
+SendInput %CurrentDateTime%{Space}
+return
+
+; today's date (quiet) 
 :://d::
 FormatTime, CurrentDateTime,, MMM-dd
 SendInput %CurrentDateTime%{Space}
