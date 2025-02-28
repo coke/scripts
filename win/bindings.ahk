@@ -14,7 +14,7 @@ return
 ; today's date for wiki inclusion
 :://dd::
 FormatTime, CurrentDateTime,, MMM-dd
-SendInput * :watch: [%CurrentDateTime%] -{Space}
+SendInput * :fire: [%CurrentDateTime%] -{Space}
 return
 
 ; today's date (long but quiet)
@@ -31,7 +31,7 @@ return
 
 :://bd::
 FormatTime, CurrentDateTime,, MMM-dd
-SendInput :watch: **%CurrentDateTime%**{Space}
+SendInput :fire: **%CurrentDateTime%**{Space}
 return
 
 :://sos::
