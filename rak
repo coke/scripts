@@ -1,5 +1,0 @@
-#!/bin/sh
-# Must be later in PATH than the zef install location
-which zef >/dev/null || rakubrew build-zef
-[[ `which rak` = $0 ]] &&  zef install --/test App::Rak
-rak $*
