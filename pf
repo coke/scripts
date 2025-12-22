@@ -14,7 +14,6 @@ for @digits.kv -> $index, $name {
 
 sub exponent_print(Str() $exp) {
     return "" if $exp == 1;
-    my $result = '';
     $exp.comb.map({@exp-digits[$_]}).join('');
 }
 
