@@ -1,0 +1,31 @@
+#!/usr/bin/env raku
+
+# prime factors
+
+my $primes = (2..*).grep(*.is-prime);
+
+my @digits = <ZERO ONE TWO THREE FOUR FIVE SIX SEVEN EIGHT NINE>;
+
+sub exponent_print(Str() $exp) {
+    my $result = '';
+    for $exp.comb -> $digit {
+        $result ~= uniparse("SUPERSCRIPT " ~ @digits[+$digit]);
+    }
+    $result;
+}
+
+sub MAIN(Int() $val is copy) {
+    my @factors;
+    for @$primes -> $factor {
+        my $count = 0;
+        while $val %% $factor {
+            $count++;
+            $val /= $factor;
+        }
+        if $count {
+            @factors.push($factor ~ exponent_print($count));
+        }
+        last if $val == 1;
+    }
+    say @factors.join(' × ');
+}
