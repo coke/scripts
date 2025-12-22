@@ -6,13 +6,16 @@ my $primes = (2..*).grep(*.is-prime);
 
 my @digits = <ZERO ONE TWO THREE FOUR FIVE SIX SEVEN EIGHT NINE>;
 
+my @exp-digits;
+
+for @digits.kv -> $index, $name {
+    @exp-digits[$index] = uniparse("SUPERSCRIPT $name");
+}
+
 sub exponent_print(Str() $exp) {
     return "" if $exp == 1;
     my $result = '';
-    for $exp.comb -> $digit {
-        $result ~= uniparse("SUPERSCRIPT " ~ @digits[+$digit]);
-    }
-    $result;
+    $exp.comb.map({@exp-digits[$_]}).join('');
 }
 
 sub MAIN(Int() $val is copy) {
