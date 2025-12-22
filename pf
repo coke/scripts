@@ -12,7 +12,7 @@ for @digits.kv -> $index, $name {
     @exp-digits[$index] = uniparse("SUPERSCRIPT $name");
 }
 
-sub exponent_print(Str() $exp) {
+sub exponent-print(Str() $exp) {
     return "" if $exp == 1;
     $exp.comb.map({@exp-digits[$_]}).join('');
 }
@@ -26,7 +26,7 @@ sub MAIN(Int() $val is copy) {
             $val /= $factor;
         }
         if $count {
-            @factors.push($factor ~ exponent_print($count));
+            @factors.push($factor ~ exponent-print($count));
         }
         last if $val == 1;
     }
