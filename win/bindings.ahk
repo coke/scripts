@@ -6,6 +6,11 @@
 SendInput I am traveling this week for a conference, and my responses may be delayed.
 return
 
+; Abilaash
+:://abi::
+SendInput Abilaash
+return
+
 ; todo
 :://tt::
 SendInput * [ ]{Space}
