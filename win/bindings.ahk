@@ -76,3 +76,11 @@ return
 :://pid::
 SendInput 524910
 return 
+
+:://CAPSOFF::
+SetCapsLockState, Off
+return
+
+:://teamsnyk::
+SendInput sparuchuri@deloitte.com;thasandeep@deloitte.com;rmalepu@deloitte.com;ryadlapalli@deloitte.com
+return
